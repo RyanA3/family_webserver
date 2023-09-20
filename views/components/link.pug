@@ -1,0 +1,6 @@
+mixin link(url)
+    div(
+        class="hover:cursor-pointer"
+        hx-get=url hx-trigger="click" hx-target="#page_container"
+        )
+        block

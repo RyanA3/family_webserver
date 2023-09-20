@@ -534,6 +534,10 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.block {
+  display: block;
+}
+
 .flex {
   display: flex;
 }
@@ -613,6 +617,10 @@ video {
 
 .p-4 {
   padding: 1rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
 }
 
 .text-3xl {
