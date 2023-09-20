@@ -1,8 +1,8 @@
 include link.pug
 mixin linkcard(url, name)
     +link(url)
-        div.p-4(
-            class="border-slate-100 rounded-md shadow bg-white hover:-translate-y-2 transition-all hover:cursor-pointer"
+        div(
+            class="p-8 border-slate-200 rounded-md shadow bg-white hover:-translate-y-2 transition-all hover:cursor-pointer"
             )
             p.text-3xl=name
             p=url

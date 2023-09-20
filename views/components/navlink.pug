@@ -1,0 +1,5 @@
+include link.pug
+mixin navlink(url, name)
+    +link(url)
+        div(class="h-full border-b-orange-600 hover:border-b-4 hover:border-t-4 border-t-zinc-900 flex items-center transition-all")
+            p.m-0.p-0.text-orange-400=name
