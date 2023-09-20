@@ -5,29 +5,24 @@ const app = express();
 const port = 3000;
 const root_directory = process.env.ROOT_DIR;
 
-function generateLinkCard(url, title) {
-    return (
-        `<div class="">
-            <p>This is a test ${title}</p>
-            <a>${url}</a>
-        </div>`
-    )
-}
 
-const compiledHome = pug.compileFile(`${root_directory}/views/index.pug`);
+
 
 app.get('/', (req, res) => {
-    //res.sendFile('/views/index.html', {root: root_directory});
-    res.send(compiledHome());
+    const index = pug.compileFile(`${root_directory}/views/index.pug`);
+    res.send(index());
 })
 
 app.get('/linkcard/:name/:url', (req, res) => {
     console.log("Request to get linkcard: " + req.params.url + " " + req.params.name)
-    //res.send(generateLinkCard(req.params.url, req.params.name));
 
     var card = pug.compileFile(`${root_directory}/views/components/linkcard.pug`);
     res.send(card({name: req.params.name, url: req.params.url}));
 });
+
+app.get('/testurlmixin', (req,res) => {
+    res.send("<div>Got url data!</div>");
+})
 
 app.get('/index.css', (req, res) => {
     console.log("Sent css file")

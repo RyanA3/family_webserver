@@ -1,3 +1,7 @@
-div(class="p-4 border-slate-100 rounded-md shadow bg-white hover:-translate-y-2 transition-all hover:cursor-pointer")
-    p This is a link to #{url}
-    p This is a link for #{name}
+mixin linkcard(url, name)
+    div.p-4(
+        class="border-slate-100 rounded-md shadow bg-white hover:-translate-y-2 transition-all hover:cursor-pointer"
+        hx-get=url hx-trigger="click" hx-target="#page_container"
+        )
+        p.text-3xl=name
+        p=url
