@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Alsobrooks Image Server</title>
+        <link href="/index.css" rel="stylesheet">
+        <script src="/htmx.min.js"></script>
+    </head>
+
+    <body class="min-w-full min-h-full bg-slate-50">
+        <nav class="w-full h-10 bg-slate-100 flex flex-row items-center justify-evenly">
+            <a>A link</a>
+            <a>Another link</a>
+        </nav>
+
+        <div id="page_container" class="p-10 flex flex-col gap-10 items-center justify-center">
+            <h1 class="text-3xl">What would you like to do?</h1>
+            <div id="link_to_images" hx-get="/linkcard/images/imagesurl" hx-trigger="load" hx-target="#link_to_images"></div>
+            <div>Another card here</div>
+        </div>
+
+    </body>
+</html>

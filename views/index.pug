@@ -1,0 +1,15 @@
+doctype html 
+html(lang="en")
+    head
+        title Family Server
+        link(href="/index.css" rel="stylesheet")
+        script(src="/htmx.min.js")
+    body(class="min-w-full min-h-full bg-slate-50")
+        nav(class="w-full h-10 bg-slate-200 flex flex-row items-center justify-evenly")
+            a A link
+            a Another link
+    
+        div(id="page_container" class="p-10 flex flex-col gap-10 items-center justify-center")
+            h1(class="text-3xl") What would you like to do?
+            div(id="link_to_images" hx-get="/linkcard/images/imagesurl" hx-trigger="load" hx-target="#link_to_images")
+            div Another link here

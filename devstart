@@ -1,0 +1,1 @@
+npx tailwindcss -i ./views/input.css -o ./assets/css/index.css --watch & npx nodemon server.js && fg
