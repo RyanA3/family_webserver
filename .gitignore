@@ -41,3 +41,7 @@ htmx.min.js
 /node_modules/
 /node_modules/*
 node_modules
+/credentials
+/credentials/
+/credentials/*
+/files

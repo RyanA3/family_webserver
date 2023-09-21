@@ -1,3 +1,5 @@
 div(class="p-10 flex flex-col gap-10 items-center justify-center")
-    h1 An error occured while accessing #{pageurl}
-    code #{e}
+    div.inline
+        h1.text-xl.px-2.inline An error occured while accessing your requested resource
+        code.bg-zinc-900.border-zinc-700.shadow.rounded.px-2.py-1.text-xl.inline #{pageurl}
+    code.bg-zinc-900.border-zinc-700.shadow.rounded.p-4.whitespace-pre-wrap #{e}

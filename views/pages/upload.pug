@@ -1,2 +1,9 @@
 div(class="p-10 flex flex-col gap-10 items-center justify-center")
     h1 Upload page
+    form(
+        id='form' hx-encoding='multipart/form-data' hx-post='/image/upload' hx-target='#form'
+        _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'
+        )
+        input(name="file" type="file")
+        button Upload
+        progress(id="progress" value='0' max='100')
