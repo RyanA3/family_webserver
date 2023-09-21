@@ -11,7 +11,7 @@ const router = express.Router();
 
 //TODO: Make 404 and error pages compile once, call function with proper args to render without compiling every time
 const dir_404_page = `${root_directory}/views/pages/404.pug`;
-const dir_err_page = `${root_directory}/views/pages/err.pug`;
+const dir_err_page = `${root_directory}/views/pages/page_compile_err.pug`;
 var page404 = pug.compileFile(dir_404_page);
 var pageErr = pug.compileFile(dir_err_page);
 

@@ -8,8 +8,8 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-const pages = require('./routes/pages.js');
-const images = require('./routes/images.js');
+const pages = require('./controllers/pages.js');
+const images = require('./controllers/images.js');
 
 
 
@@ -30,7 +30,7 @@ app.use('/image', images);
 
 
 
-const server = app.listen(port, () => {
+const server = app.listen(port, '0.0.0.0', () => {
     console.log(`Example app listening on port ${port}`)
 })
 

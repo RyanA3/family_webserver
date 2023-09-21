@@ -1,9 +1,30 @@
-div(class="p-10 flex flex-col gap-10 items-center justify-center")
-    h1 Upload page
+div(class="h-full p-20 flex justify-center items-center")
     form(
-        id='form' hx-encoding='multipart/form-data' hx-post='/image/upload' hx-target='#form'
-        _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'
+        class="p-10 bg-zinc-700 border-orange-600 border-2 rounded shadow flex flex-col justify-center items-center gap-10 text-xl"
+        id='form' hx-encoding='multipart/form-data' hx-post='/image/upload' hx-target='#page_container'
         )
-        input(name="file" type="file")
-        button Upload
-        progress(id="progress" value='0' max='100')
+        h1.text-3xl.p-0.m-0(id="info_upload") Upload Images
+        h1.text-3xl.p-0.m-0(id="info_uploading" hidden) Uploading...
+        input(
+            class='cursor-pointer! file:flex file:flex-col file:w-full file:items-center file:justify-between file:bg-orange-400 file:border-0 file:rounded file:shadow file:px-4 file:py-2'
+            id="files" name="files" type="file" accept="image/*" multiple required
+            )
+        button(
+            id="upload_button"
+            class="w-full bg-orange-400 rounded shadow px-4 py-2 text-black"
+            ) Upload Images
+        div.w-full.flex.flex-col(id="upload_progress")
+            p(id="progress_lbl" hidden) Progress
+            progress.w-full.border-2.border-orange-600.h-8(id="progress" value='0' max='100' hidden)
+    script.
+        htmx.on('#form', 'htmx:xhr:progress', function(evt) { 
+            htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100) 
+        })
+        htmx.on('#form', 'submit', function (evt) { 
+            htmx.find('#progress_lbl').removeAttribute('hidden');
+            htmx.find('#progress').removeAttribute('hidden');
+            htmx.find('#info_uploading').removeAttribute('hidden');
+            htmx.find('#files').setAttribute('hidden', true);
+            htmx.find('#upload_button').setAttribute('hidden', true);
+            htmx.find('#info_upload').setAttribute('hidden', true);
+        })

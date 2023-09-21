@@ -8,8 +8,8 @@ html(lang="en")
             include ../assets/css/index.css
         script
             include ../htmx.min.js
-    body(class="min-w-full min-h-full bg-zinc-800 text-white")
+    body(class="flex flex-col w-screen min-h-screen bg-zinc-800 text-white")
         include components/navbar.pug
     
-        div(id="page_container")
+        div(id="page_container" class="flex-1 flex flex-col")
             include pages/home.pug
