@@ -9,7 +9,7 @@ const express = require('express');
 const router = express.Router();
 
 const multer = require('multer');
-const multi_upload = require('../services/upload/upload.js');
+const multi_upload = require('../services/upload.js');
 
 
 
