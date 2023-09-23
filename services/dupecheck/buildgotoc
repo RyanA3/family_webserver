@@ -1,0 +1,1 @@
+go build -o dupecheck.so -buildmode=c-shared dupecheck.go

@@ -7,11 +7,17 @@ import (
 	"os"
 	"time"
 
+	"C"
+
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
 )
 
-// TODO: Read metadata from image file https://stackoverflow.com/questions/60497938/read-exif-metadata-with-go
+// TODO: Run go function from node https://medium.com/learning-the-go-programming-language/calling-go-functions-from-other-languages-4c7d8bcc69bf
+// ref hasn't been updated in 6 years and doesn't work
+// node-ffi only supports up to node 11 :(
+// TODO: Find another way to run go functions from node
+// Webassembly????? https://pedromarquez.dev/blog/2023/2/node_golang_wasm
 // TODO: Call go functions from node server using compile to c with go and a node library?
 // TODO: Connect / pass mongoose to go program from node if possible. Add image metadata to database on process
 // TODO: Setup local mongo database for the ungodly amount of database calls that are about to happen
@@ -115,7 +121,8 @@ func decodeAll(path string, files []fs.DirEntry) []ImageExifData {
 
 }
 
-func ProcessUploadedImages(process_dir, success_dir string) {
+//export ProcessUploadedImages
+func ProcessUploadedImages(process_dir, success_dir string) string {
 	//Load all files in processing
 	files, err := os.ReadDir(process_dir)
 	num_files := len(files)
@@ -140,6 +147,8 @@ func ProcessUploadedImages(process_dir, success_dir string) {
 		fmt.Println()
 	}
 
+	return "Hello from Go!"
+
 }
 
 /*
@@ -158,6 +167,18 @@ func findDuplicatesInProcessing(imgdats []ImageExifData) [][]string {
 
 	return dupes
 }
+
+/*
+Checks if each image is a duplicate of an image that has already been uploaded and is in the database (not in processing)
+Takes
+  - A list of images to check
+
+Returns
+  - A list of duplicates from the database corresponding to each image in the input list
+*/
+// func findDuplicatesInDatabase(imgdats []ImageExifData) [][]string {
+
+// }
 
 /*
 Generic function for finding any duplicates to an individual image in a list of images
@@ -210,6 +231,6 @@ func isDuplicate(file, check ImageExifData) bool {
 }
 
 func main() {
-	fmt.Println("Main shouldn't be used!!!!")
-	ProcessUploadedImages(process_dir, success_dir)
+	// fmt.Println("Main shouldn't be used!!!!")
+	// ProcessUploadedImages(process_dir, success_dir)
 }

@@ -11,8 +11,6 @@ const port = 3000;
 const pages = require('./controllers/pages.js');
 const images = require('./controllers/images.js');
 
-
-
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_AUTH_URL)
 console.log('Database connected');
