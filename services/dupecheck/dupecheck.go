@@ -1,25 +1,19 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io/fs"
 	"log"
 	"os"
 	"time"
 
-	"C"
-
 	"github.com/rwcarlsen/goexif/exif"
 	"github.com/rwcarlsen/goexif/mknote"
 
 	"github.com/spf13/viper"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-)
-import (
+	"strings"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -39,17 +33,6 @@ var database_name = "FamilyDB"
 
 const env_path = "/home/ryan/repos/family_image_server/.env"
 
-var mclient *mongo.Client
-var db *mongo.Database
-
-type ImageExifData struct {
-	created       time.Time
-	make          string
-	model         string
-	original_name string
-	file_size     int64
-}
-
 var default_creation_time = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.Local)
 
 func initConstants() {
@@ -65,34 +48,6 @@ func initConstants() {
 	fmt.Printf("Loaded env with viper")
 }
 
-func connectDatabase() {
-
-	fmt.Println("Connecting database...")
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(viper.GetString("MONGO_AUTH_URL")).SetServerAPIOptions(serverAPI)
-
-	// Create a new client and connect to the server
-	client, err := mongo.Connect(context.TODO(), opts)
-	if err != nil {
-		panic(err)
-	}
-	// defer func() {
-	// 	if err = client.Disconnect(context.TODO()); err != nil {
-	// 		fmt.Printf("Disconnected db %s\n", err)
-	// 		panic(err)
-	// 	}
-	// }()
-	// Send a ping to confirm a successful connection
-	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
-		panic(err)
-	}
-	fmt.Printf("Connected Database\n")
-
-	mclient = client
-	db = mclient.Database(database_name)
-
-}
-
 /*
 Takes
   - a path to an image file
@@ -106,7 +61,25 @@ Returns
 */
 func decode(filepath string) ImageMeta {
 
-	var meta ImageMeta = ImageMeta{id: primitive.NewObjectID(), original_name: filepath, uploaded: time.Now()}
+	//Get the file extension
+	splitpath := strings.Split(filepath, ".")
+	var extension string = ""
+	if len(splitpath) > 1 {
+		extension = splitpath[len(splitpath)-1]
+	}
+	fmt.Printf("Extension: %s\n", extension)
+
+	var meta ImageMeta = ImageMeta{id: primitive.NewObjectID(), extension: extension, original_name: filepath, uploaded: time.Now()}
+
+	//Move the file to the images folder once processing has complete, and rename it
+	defer func() {
+		fmt.Printf("%s --> %s\n", filepath, images_dir+"/"+meta.id.Hex()+"."+meta.extension)
+		newpath := images_dir + "/" + meta.id.Hex()
+		if len(meta.extension) > 0 {
+			newpath += "." + meta.extension
+		}
+		os.Rename(filepath, newpath)
+	}()
 
 	//Read metadata
 	filemeta, err := os.Stat(filepath)
@@ -117,8 +90,7 @@ func decode(filepath string) ImageMeta {
 		//return ImageExifData{default_time, default_make, default_model, time.Now().String(), default_size}
 	}
 
-	meta.file_size = uint64(filemeta.Size())
-	meta.uploaded = filemeta.ModTime()
+	meta.file_size = filemeta.Size()
 	meta.original_name = filemeta.Name()
 
 	//Open file
@@ -128,6 +100,8 @@ func decode(filepath string) ImageMeta {
 		return meta
 		//return ImageExifData{default_time, default_make, default_model, filemeta.Name(), filemeta.Size()}
 	}
+
+	defer file.Close()
 
 	//Decode Exif data
 	exif.RegisterParsers(mknote.Canon, mknote.NikonV3)
@@ -152,7 +126,6 @@ func decode(filepath string) ImageMeta {
 		meta.camera_model, err = model.StringVal()
 	}
 
-	file.Close()
 	return meta
 	//return ImageExifData{time, smake, smodel, filemeta.Name(), filemeta.Size()}
 
@@ -187,13 +160,12 @@ func ProcessUploadedImages(process_dir, success_dir string) {
 	fmt.Printf("Found %s files\n", fmt.Sprint(num_files))
 
 	var imgdats []ImageMeta = decodeAll(process_dir, files)
-	var dupes [][]string = findDuplicatesInProcessing(imgdats)
 
-	for i, idupes := range dupes {
-		fmt.Printf("%s has %s duplicates: ", imgdats[i].original_name, fmt.Sprint(len(idupes)))
+	for _, imgdat := range imgdats {
+		fmt.Printf("%s has %s duplicates: ", imgdat.original_name, fmt.Sprint(len(imgdat.duplicates)))
 
-		if len(idupes) > 0 {
-			for _, dupe := range idupes {
+		if len(imgdat.duplicates) > 0 {
+			for _, dupe := range imgdat.duplicates {
 				fmt.Printf("%s, ", dupe)
 			}
 		}
@@ -202,66 +174,15 @@ func ProcessUploadedImages(process_dir, success_dir string) {
 	}
 
 	//os.OpenFile(output_dir, os.O_CREATE, fs.FileMode(os.O_RDWR))
-	uploadImagesDataToDatabase(imgdats, dupes)
+	uploadImagesDataToDatabase(imgdats)
+	UpdateDuplicates(imgdats[0])
 
 }
 
-func uploadImagesDataToDatabase(imgdats []ImageMeta, dupes [][]string) {
-
-	images_collection := db.Collection("ImageMeta")
-	images_collection.DeleteMany(context.TODO(), &ImageMeta{})
-
-	for i, imgdat := range imgdats {
-		uploadImage(images_collection, imgdat, dupes[i])
+func uploadImagesDataToDatabase(imgdats []ImageMeta) {
+	for _, imgdat := range imgdats {
+		UploadImageData(imgdat)
 	}
-
-}
-
-type ImageMeta struct {
-	id            primitive.ObjectID `bson:"_id"`
-	original_name string             `bson:"original_name"`
-	created       time.Time          `bson:"created"`
-	uploaded      time.Time          `bson:"uploaded"`
-	file_size     uint64             `bson:"file_size"`
-	camera_make   string             `bson:"camera_make,omitempty"`
-	camera_model  string             `bson:"camera_model,omitempty"`
-	duplicates    []string           `bson:"duplicates,omitempty"`
-}
-
-func ImageMetaToBson(meta ImageMeta) primitive.D {
-	return bson.D{
-		{Key: "_id", Value: meta.id},
-		{Key: "original_name", Value: meta.original_name},
-		{Key: "camera_make", Value: meta.camera_make},
-		{Key: "camera_model", Value: meta.camera_model},
-		{Key: "created", Value: meta.created},
-		{Key: "uploaded", Value: meta.uploaded},
-		{Key: "file_size", Value: meta.file_size},
-		{Key: "duplicates", Value: meta.duplicates},
-	}
-}
-
-func uploadImage(images_collection *mongo.Collection, imgdat ImageMeta, dupes []string) {
-
-	fmt.Printf("Uploading %s...\n", imgdat.original_name)
-
-	// res, err := images_collection.InsertOne(context.Background(), bson.D{
-	// 	{Key: "original_name", Value: imgdat.original_name},
-	// 	{Key: "camera_make", Value: imgdat.make},
-	// 	{Key: "camera_model", Value: imgdat.model},
-	// 	{Key: "created", Value: imgdat.created},
-	// 	{Key: "uploaded", Value: time.Now()},
-	// 	{Key: "file_size", Value: imgdat.file_size},
-	// 	{Key: "duplicates", Value: dupes},
-	// })
-	imgdat.duplicates = dupes
-	res, err := images_collection.InsertOne(context.TODO(), ImageMetaToBson(imgdat))
-
-	if err != nil {
-		fmt.Printf("Error uploading document %s\n %s\n", imgdat.original_name, err)
-	}
-
-	fmt.Printf("Uploaded document with id %v\n", res.InsertedID)
 }
 
 /*
@@ -271,27 +192,20 @@ Takes
 Returns
   - Any duplicates of those images within the same folder
 */
-func findDuplicatesInProcessing(imgdats []ImageMeta) [][]string {
-	var dupes [][]string = make([][]string, len(imgdats))
-
+func findDuplicatesInProcessing(imgdats []ImageMeta) {
 	for i, f := range imgdats {
-		dupes[i] = findDuplicatesOf(f, imgdats, i+1)
+		f.duplicates = findDuplicatesOf(f, imgdats, i+1)
 	}
-
-	return dupes
 }
 
 /*
-Checks if each image is a duplicate of an image that has already been uploaded and is in the database (not in processing)
+Updates the duplicate list of each image in the provided list
 Takes
   - A list of images to check
-
-Returns
-  - A list of duplicates from the database corresponding to each image in the input list
 */
-// func findDuplicatesInDatabase(imgdats []ImageExifData) [][]string {
+func updateDuplicates(imgdats []ImageMeta) {
 
-// }
+}
 
 /*
 Generic function for finding any duplicates to an individual image in a list of images
@@ -347,9 +261,13 @@ func isDuplicate(file, check ImageMeta) bool {
 }
 
 func main() {
+
 	initConstants()
-	connectDatabase()
+
+	ConnectDatabase()
+	defer DisconnectDatabase()
+
 	fmt.Println("Checking for duplicates!")
 	ProcessUploadedImages(process_dir, images_dir)
-	mclient.Disconnect(context.TODO())
+
 }

@@ -2,7 +2,7 @@ require("dotenv").config();
 const is_production = process.env.NODE_ENV === "production";
 const files_dir = process.env.FILES_DIR + 'processing/';
 
-const ImageFileMeta = require('../models/ImageFileMeta');
+const ImageFileMeta = require('../models/ImageMeta');
 const mongoose = require('mongoose');
 
 const multer = require('multer');

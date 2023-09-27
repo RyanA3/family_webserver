@@ -15,12 +15,23 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_AUTH_URL)
 console.log('Database connected');
 
+const ImageMeta = require("./models/ImageMeta.js")
+
 
 
 var index = pug.compileFile(`${root_directory}/views/index.pug`);
 app.get('/', (req, res) => {
     if(!is_production) index = pug.compileFile(`${root_directory}/views/index.pug`);
     res.send(index());
+    new ImageMeta({
+        created: new Date(), 
+        uploaded: new Date(), 
+        file_type: "test",
+        original_name: "wowzers",
+        camera_make: "microsoft",
+        camera_model: "vscode",
+        file_size: 100
+    }).save();
 })
 
 app.use('/page', pages);
