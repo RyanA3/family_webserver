@@ -67,13 +67,11 @@ func decode(filepath string) ImageMeta {
 	if len(splitpath) > 1 {
 		extension = splitpath[len(splitpath)-1]
 	}
-	fmt.Printf("Extension: %s\n", extension)
 
 	var meta ImageMeta = ImageMeta{id: primitive.NewObjectID(), extension: extension, original_name: filepath, uploaded: time.Now()}
 
 	//Move the file to the images folder once processing has complete, and rename it
 	defer func() {
-		fmt.Printf("%s --> %s\n", filepath, images_dir+"/"+meta.id.Hex()+"."+meta.extension)
 		newpath := images_dir + "/" + meta.id.Hex()
 		if len(meta.extension) > 0 {
 			newpath += "." + meta.extension
@@ -87,7 +85,6 @@ func decode(filepath string) ImageMeta {
 		fmt.Println("Error reading image meta: " + filepath)
 		meta.created = default_creation_time
 		return meta
-		//return ImageExifData{default_time, default_make, default_model, time.Now().String(), default_size}
 	}
 
 	meta.file_size = filemeta.Size()
@@ -98,7 +95,6 @@ func decode(filepath string) ImageMeta {
 	if err != nil {
 		fmt.Println("Error loading image file: " + filepath)
 		return meta
-		//return ImageExifData{default_time, default_make, default_model, filemeta.Name(), filemeta.Size()}
 	}
 
 	defer file.Close()
@@ -110,7 +106,6 @@ func decode(filepath string) ImageMeta {
 		file.Close()
 		fmt.Println("Error reading image exif data: " + filepath)
 		return meta
-		//return ImageExifData{default_time, default_make, default_model, filemeta.Name(), filemeta.Size()}
 	}
 
 	// Convenience functions for getting datetime
@@ -127,8 +122,6 @@ func decode(filepath string) ImageMeta {
 	}
 
 	return meta
-	//return ImageExifData{time, smake, smodel, filemeta.Name(), filemeta.Size()}
-
 }
 
 /*
@@ -161,19 +154,18 @@ func ProcessUploadedImages(process_dir, success_dir string) {
 
 	var imgdats []ImageMeta = decodeAll(process_dir, files)
 
-	for _, imgdat := range imgdats {
-		fmt.Printf("%s has %s duplicates: ", imgdat.original_name, fmt.Sprint(len(imgdat.duplicates)))
+	// for _, imgdat := range imgdats {
+	// 	fmt.Printf("%s has %s duplicates: ", imgdat.original_name, fmt.Sprint(len(imgdat.duplicates)))
 
-		if len(imgdat.duplicates) > 0 {
-			for _, dupe := range imgdat.duplicates {
-				fmt.Printf("%s, ", dupe)
-			}
-		}
+	// 	if len(imgdat.duplicates) > 0 {
+	// 		for _, dupe := range imgdat.duplicates {
+	// 			fmt.Printf("%s, ", dupe)
+	// 		}
+	// 	}
 
-		fmt.Println()
-	}
+	// 	fmt.Println()
+	// }
 
-	//os.OpenFile(output_dir, os.O_CREATE, fs.FileMode(os.O_RDWR))
 	uploadImagesDataToDatabase(imgdats)
 	UpdateDuplicates(imgdats[0])
 
@@ -196,15 +188,6 @@ func findDuplicatesInProcessing(imgdats []ImageMeta) {
 	for i, f := range imgdats {
 		f.duplicates = findDuplicatesOf(f, imgdats, i+1)
 	}
-}
-
-/*
-Updates the duplicate list of each image in the provided list
-Takes
-  - A list of images to check
-*/
-func updateDuplicates(imgdats []ImageMeta) {
-
 }
 
 /*
@@ -267,7 +250,17 @@ func main() {
 	ConnectDatabase()
 	defer DisconnectDatabase()
 
-	fmt.Println("Checking for duplicates!")
-	ProcessUploadedImages(process_dir, images_dir)
+	//fmt.Println("Checking for duplicates!")
+	//ProcessUploadedImages(process_dir, images_dir)
+
+	//1. Decode and load all files in processing
+
+	//2. Goroutine upload files to database and move to images folder
+
+	//3. Wait to completion
+
+	//4. Goroutine check files for duplicates and update
+
+	//5. Done
 
 }

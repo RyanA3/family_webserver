@@ -61,10 +61,23 @@ func UpdateDuplicates(imgdat ImageMeta) {
 
 	fmt.Printf("Finding duplicates of %s...\n", imgdat.original_name)
 
+	//Find the duplicates of this image
 	var time_low = imgdat.created.Add(time.Duration(-duplicate_time_range))
 	var time_high = imgdat.created.Add(time.Duration(duplicate_time_range))
 
-	res, err := images_collection.Find(context.TODO(), bson.M{
+	opts := options.Find().SetProjection(bson.M{
+		"_id":           1,
+		"camera_make":   0,
+		"camera_model":  0,
+		"original_name": 0,
+		"file_size":     0,
+		"duplicates":    0,
+		"created":       0,
+		"uploaded":      0,
+		"extension":     0,
+	})
+
+	query := bson.M{
 		"_id": bson.M{
 			"$ne": imgdat.id,
 		},
@@ -80,45 +93,61 @@ func UpdateDuplicates(imgdat ImageMeta) {
 				"$lte": time_high,
 			}},
 		}},
-	},
-	)
+	}
 
-	defer res.Close(context.TODO())
+	cursor, err := images_collection.Find(context.TODO(), query, opts)
+	defer cursor.Close(context.TODO())
 
 	if err != nil {
 		fmt.Printf("Error whilst querying: %s\n", err)
 		return
 	}
 
-	var duplicates []ImageMeta
-	// res.All(context.TODO(), duplicates)
+	duplicates := DecodeObjectIds(cursor)
 
-	for res.Next(context.TODO()) {
-		var result interface{}
-		err = res.Decode(&result)
-
-		if err != nil {
-			fmt.Printf("Error whilst decoding: %s\n", err)
-			continue
-		}
-		//fmt.Printf("result: %v\n", result)
-
-		meta := DecodeImageMetaFromDatabaseResponse(result.(primitive.D))
-		duplicates = append(duplicates, meta)
-		//fmt.Printf("name: %s\nsize: %v\ncreated: %v\nmake: %s\nmodel: %s\n\n", meta.original_name, meta.file_size, meta.created, meta.camera_make, meta.camera_model)
-		//fmt.Printf("name: %s\nsize: %v\ncreated: %v\nmake: %s\nmodel: %s\n\n", result.original_name, result.file_size, result.created, result.camera_make, result.camera_model)
-
-		//duplicates = append(duplicates, result)
+	//Update the duplicates of the document
+	update := bson.M{
+		"duplicates": bson.A{duplicates},
 	}
 
-	fmt.Printf("Found %s duplicates: \n", fmt.Sprint(len(duplicates)))
-	for _, dupe := range duplicates {
-		fmt.Printf("name: %s\nsize: %v\ncreated: %v\nmake: %s\nmodel: %s\n\n", dupe.original_name, dupe.file_size, dupe.created, dupe.camera_make, dupe.camera_model)
+	_, err = images_collection.UpdateByID(context.TODO(), imgdat.id, update)
+
+	if err != nil {
+		fmt.Printf("Error updating duplicates for %s:\n%s", imgdat.id.Hex(), err)
 	}
 
 }
 
-func DecodeImageMetaFromDatabaseResponse(data primitive.D) ImageMeta {
+func DecodeObjectIds(cursor *mongo.Cursor) []primitive.ObjectID {
+
+	var out []primitive.ObjectID
+
+	for cursor.Next(context.TODO()) {
+		var result interface{}
+		cursor.Decode(&result)
+		var data = result.(primitive.D)[0]
+		out = append(out, data.Value.(primitive.ObjectID))
+	}
+
+	return out
+
+}
+
+func DecodeImageMetas(cursor *mongo.Cursor) []ImageMeta {
+
+	var out []ImageMeta
+
+	for cursor.Next(context.TODO()) {
+		var result interface{}
+		cursor.Decode(&result)
+		out = append(out, DecodeImageMeta(result.(primitive.D)))
+	}
+
+	return out
+
+}
+
+func DecodeImageMeta(data primitive.D) ImageMeta {
 
 	var out ImageMeta
 
