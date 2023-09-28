@@ -95,7 +95,9 @@ func ProcessUploadedImages(process_dir, success_dir string) {
 	var num_duplicates_channel = make(chan int, len(uploaded))
 
 	for _, imgdat := range uploaded {
-		go UpdateDuplicates(imgdat, num_duplicates_channel)
+		go func(imgdat ImageMeta, c chan int) {
+			c <- UpdateDuplicates(imgdat)
+		}(imgdat, num_duplicates_channel)
 	}
 
 	//Just blocking until all duplicate update checks are done for funzies
@@ -111,6 +113,52 @@ func ProcessUploadedImages(process_dir, success_dir string) {
 	ms_taken = end_dupecheck_time.Sub(start_dupecheck_time).Milliseconds()
 	fmt.Printf("%s duplicates identified in %sms\n\n", fmt.Sprint(num_duplicates), fmt.Sprint(ms_taken))
 
+}
+
+func ProcessUploadedImagesSerially(process_dir, success_dir string) {
+	//1. Load all files in processing folder
+	files, err := os.ReadDir(process_dir)
+	num_files := len(files)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found %s files\n\nStarting SERIAL decode and upload process...\n", fmt.Sprint(num_files))
+	var start_decoding_time = time.Now()
+	var uploaded []ImageMeta = make([]ImageMeta, len(files))
+
+	//2. Handle all the files in processing
+	for i, file := range files {
+		filepath := process_dir + "/" + file.Name()
+		fmt.Printf("Decoding file %s\n", filepath)
+		//2.1 Decode file
+		uploaded[i] = decode(filepath)
+
+		//2.2 Upload to database
+		UploadImageData(uploaded[i])
+
+		//2.3 Move to images folder
+		RenameAndMove(filepath, uploaded[i])
+
+	}
+
+	var end_decoding_time = time.Now()
+	var ms_taken = end_decoding_time.Sub(start_decoding_time).Milliseconds()
+	fmt.Printf("SERIAL %s images decoded and uploaded in %sms\n\n", fmt.Sprint(len(files)), fmt.Sprint(ms_taken))
+
+	//4. Check files for duplicates and update
+	fmt.Printf("\n\nChecking for duplicates...\n")
+	var start_dupecheck_time = time.Now()
+
+	var num_duplicates = 0
+
+	for _, imgdat := range uploaded {
+		num_duplicates += UpdateDuplicates(imgdat)
+	}
+
+	var end_dupecheck_time = time.Now()
+	ms_taken = end_dupecheck_time.Sub(start_dupecheck_time).Milliseconds()
+	fmt.Printf("SERIAL %s duplicates identified in %sms\n\n", fmt.Sprint(num_duplicates), fmt.Sprint(ms_taken))
 }
 
 func main() {

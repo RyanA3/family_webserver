@@ -59,7 +59,7 @@ func UploadImageData(imgdat ImageMeta) {
 
 }
 
-func UpdateDuplicates(imgdat ImageMeta, c chan int) {
+func UpdateDuplicates(imgdat ImageMeta) int {
 
 	//fmt.Printf("Finding duplicates of %s...\n", imgdat.original_name)
 
@@ -102,8 +102,7 @@ func UpdateDuplicates(imgdat ImageMeta, c chan int) {
 
 	if err != nil {
 		fmt.Printf("Error whilst querying: %s\n", err)
-		c <- 0
-		return
+		return 0
 	}
 
 	duplicates := DecodeObjectIds(cursor)
@@ -119,10 +118,10 @@ func UpdateDuplicates(imgdat ImageMeta, c chan int) {
 
 	if err != nil {
 		fmt.Printf("Error updating duplicates for %s:\n%s", imgdat.id.Hex(), err)
-		c <- 0
+		return 0
 	}
 
-	c <- len(duplicates)
+	return len(duplicates)
 
 }
 
