@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io/fs"
 	"log"
@@ -9,7 +8,6 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // TODO: Run go function from node https://medium.com/learning-the-go-programming-language/calling-go-functions-from-other-languages-4c7d8bcc69bf
@@ -167,8 +165,6 @@ func main() {
 
 	ConnectDatabase()
 	defer DisconnectDatabase()
-
-	images_collection.DeleteMany(context.TODO(), bson.D{})
 
 	fmt.Println("Checking for duplicates!")
 	ProcessUploadedImages(process_dir, images_dir)

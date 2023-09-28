@@ -108,10 +108,10 @@ func UpdateDuplicates(imgdat ImageMeta) int {
 	duplicates := DecodeObjectIds(cursor)
 
 	//Update the duplicates of the document
-	update := bson.M{
-		"$set": bson.M{
-			"duplicates": bson.A{duplicates},
-		},
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "duplicates", Value: duplicates},
+		}},
 	}
 
 	_, err = images_collection.UpdateByID(context.TODO(), imgdat.id, update)
