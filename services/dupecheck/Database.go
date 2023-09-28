@@ -17,6 +17,7 @@ var db *mongo.Database
 var images_collection *mongo.Collection
 
 func ConnectDatabase() {
+
 	fmt.Println("Connecting database...")
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(viper.GetString("MONGO_AUTH_URL")).SetServerAPIOptions(serverAPI)
@@ -36,6 +37,7 @@ func ConnectDatabase() {
 	mclient = client
 	db = mclient.Database(database_name)
 	images_collection = db.Collection("ImageMeta")
+
 }
 
 func DisconnectDatabase() {
@@ -57,9 +59,9 @@ func UploadImageData(imgdat ImageMeta) {
 
 }
 
-func UpdateDuplicates(imgdat ImageMeta) {
+func UpdateDuplicates(imgdat ImageMeta, c chan int) {
 
-	fmt.Printf("Finding duplicates of %s...\n", imgdat.original_name)
+	//fmt.Printf("Finding duplicates of %s...\n", imgdat.original_name)
 
 	//Find the duplicates of this image
 	var time_low = imgdat.created.Add(time.Duration(-duplicate_time_range))
@@ -100,6 +102,7 @@ func UpdateDuplicates(imgdat ImageMeta) {
 
 	if err != nil {
 		fmt.Printf("Error whilst querying: %s\n", err)
+		c <- 0
 		return
 	}
 
@@ -107,14 +110,19 @@ func UpdateDuplicates(imgdat ImageMeta) {
 
 	//Update the duplicates of the document
 	update := bson.M{
-		"duplicates": bson.A{duplicates},
+		"$set": bson.M{
+			"duplicates": bson.A{duplicates},
+		},
 	}
 
 	_, err = images_collection.UpdateByID(context.TODO(), imgdat.id, update)
 
 	if err != nil {
 		fmt.Printf("Error updating duplicates for %s:\n%s", imgdat.id.Hex(), err)
+		c <- 0
 	}
+
+	c <- len(duplicates)
 
 }
 
@@ -147,6 +155,7 @@ func DecodeImageMetas(cursor *mongo.Cursor) []ImageMeta {
 
 }
 
+// TODO: There has to be a better way to do this, custom decoder if feeling funny, library if not feeling it
 func DecodeImageMeta(data primitive.D) ImageMeta {
 
 	var out ImageMeta

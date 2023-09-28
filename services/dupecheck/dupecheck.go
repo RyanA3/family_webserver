@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"time"
 
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // TODO: Run go function from node https://medium.com/learning-the-go-programming-language/calling-go-functions-from-other-languages-4c7d8bcc69bf
@@ -42,32 +45,72 @@ func initConstants() {
 }
 
 func ProcessUploadedImages(process_dir, success_dir string) {
-	//1. Load and decode all files in processing folder
+	//1. Load all files in processing folder
 	files, err := os.ReadDir(process_dir)
 	num_files := len(files)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Found %s files\n", fmt.Sprint(num_files))
-	var imgdats []ImageMeta = decodeAll(process_dir, files)
+	fmt.Printf("Found %s files\n\nStarting decode and upload process...\n", fmt.Sprint(num_files))
 
-	//2. Goroutine upload files to database and move to images folder
-	uploadImagesDataToDatabase(imgdats)
+	var start_decoding_time = time.Now()
 
-	//3. Wait to completion
+	var uploaded []ImageMeta = make([]ImageMeta, len(files))
+	channel := make(chan ImageMeta, len(files))
+
+	//2. Handle all the files in processing
+	for i, file := range files {
+		go func(file fs.DirEntry, i int, c chan ImageMeta) {
+			filepath := process_dir + "/" + file.Name()
+			fmt.Printf("Decoding file %s\n", filepath)
+			//2.1 Decode file
+			meta := decode(filepath)
+
+			//2.2 Upload to database
+			UploadImageData(meta)
+
+			//2.3 Move to images folder
+			RenameAndMove(filepath, meta)
+
+			c <- meta
+
+		}(file, i, channel)
+	}
+
+	//3. Receive data from decoding process and wait to completion
+	for i := range files {
+		uploaded[i] = <-channel
+		fmt.Printf("Processed image: %v\n", uploaded[i].original_name)
+	}
+
+	var end_decoding_time = time.Now()
+	var ms_taken = end_decoding_time.Sub(start_decoding_time).Milliseconds()
+	fmt.Printf("%s images decoded and uploaded in %sms\n\n", fmt.Sprint(len(files)), fmt.Sprint(ms_taken))
 
 	//4. Goroutine check files for duplicates and update
-	UpdateDuplicates(imgdats[0])
+	fmt.Printf("\n\nChecking for duplicates...\n")
+	var start_dupecheck_time = time.Now()
 
-	//5. Done
+	var num_duplicates_channel = make(chan int, len(uploaded))
 
-}
-
-func uploadImagesDataToDatabase(imgdats []ImageMeta) {
-	for _, imgdat := range imgdats {
-		UploadImageData(imgdat)
+	for _, imgdat := range uploaded {
+		go UpdateDuplicates(imgdat, num_duplicates_channel)
 	}
+
+	//Just blocking until all duplicate update checks are done for funzies
+	num_duplicates := 0
+	for i := range uploaded {
+		num_duplicates += <-num_duplicates_channel
+		if i >= len(uploaded) {
+			break
+		}
+	}
+
+	var end_dupecheck_time = time.Now()
+	ms_taken = end_dupecheck_time.Sub(start_dupecheck_time).Milliseconds()
+	fmt.Printf("%s duplicates identified in %sms\n\n", fmt.Sprint(num_duplicates), fmt.Sprint(ms_taken))
+
 }
 
 func main() {
@@ -77,7 +120,9 @@ func main() {
 	ConnectDatabase()
 	defer DisconnectDatabase()
 
-	//fmt.Println("Checking for duplicates!")
-	//ProcessUploadedImages(process_dir, images_dir)
+	images_collection.DeleteMany(context.TODO(), bson.D{})
+
+	fmt.Println("Checking for duplicates!")
+	ProcessUploadedImages(process_dir, images_dir)
 
 }

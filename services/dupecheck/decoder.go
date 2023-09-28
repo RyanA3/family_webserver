@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"strings"
 	"time"
@@ -33,15 +32,6 @@ func decode(filepath string) ImageMeta {
 	}
 
 	var meta ImageMeta = ImageMeta{id: primitive.NewObjectID(), extension: extension, original_name: filepath, uploaded: time.Now()}
-
-	//Move the file to the images folder once processing has complete, and rename it
-	defer func() {
-		newpath := images_dir + "/" + meta.id.Hex()
-		if len(meta.extension) > 0 {
-			newpath += "." + meta.extension
-		}
-		os.Rename(filepath, newpath)
-	}()
 
 	//Read metadata
 	filemeta, err := os.Stat(filepath)
@@ -88,20 +78,10 @@ func decode(filepath string) ImageMeta {
 	return meta
 }
 
-/*
-Takes
-  - A root directory
-  - A list of files to decode
-
-Returns
-  - A list of ImageExifData (decoded images)
-*/
-func decodeAll(path string, files []fs.DirEntry) []ImageMeta {
-
-	var xdatas = make([]ImageMeta, len(files))
-	for i, file := range files {
-		xdatas[i] = decode(path + "/" + file.Name())
+func RenameAndMove(filepath string, meta ImageMeta) {
+	newpath := images_dir + "/" + meta.id.Hex()
+	if len(meta.extension) > 0 {
+		newpath += "." + meta.extension
 	}
-	return xdatas
-
+	os.Rename(filepath, newpath)
 }
