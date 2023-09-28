@@ -26,6 +26,7 @@ var database_name = "FamilyDB"
 const env_path = "/home/ryan/repos/family_image_server/.env"
 
 var default_creation_time = time.Date(2000, time.January, 1, 0, 0, 0, 0, time.Local)
+var duplicate_time_range time.Duration = time.Duration(2 * float64(time.Second))
 
 func initConstants() {
 	viper.GetViper().SetConfigFile(env_path)
