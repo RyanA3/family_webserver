@@ -1,4 +1,4 @@
-module main
+module dupecheck
 
 go 1.21.1
 

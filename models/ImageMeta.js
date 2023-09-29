@@ -21,7 +21,8 @@ const ImageMeta = new mongoose.Schema({
     },
     extension: {
         type: String,
-    }
+    },
+    duplicates: [String]
 })
 
-module.exports = mongoose.model("ImageMeta", ImageMeta)
+module.exports = mongoose.model(process.env.MONGO_IMAGE_META_COLLECTION_NAME, ImageMeta)

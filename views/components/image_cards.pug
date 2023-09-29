@@ -1,0 +1,13 @@
+div(class="flex flex-row items-center justify-center w-full h-full flex-wrap")
+    each imgName in imageNames
+        div(class="shrink basis-1/6 p-2")
+            img(
+                alt="Failed to load image" 
+                src=`images/${imgName}` 
+                class="object-contain border-2 border-orange-300 cursor-pointer"
+                id=imgName
+                hx-get=`image/full/${imgName}`
+                hx-trigger="click"
+                hx-target="#fullImageModal"
+                hx-swap="innerHTML"
+                )

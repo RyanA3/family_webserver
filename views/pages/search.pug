@@ -1,2 +1,6 @@
 div(class="p-10 flex flex-col gap-10 items-center justify-center")
-    h1 Search page
+    div(class="p-10 bg-zinc-700 border-orange-600 border-2 rounded shadow flex flex-col justify-center items-start gap-10 text-xl w-full h-full")
+        h1.text-3xl Search Images
+        div(hx-get="/image/images/0" hx-trigger="load" hx-swap="outerHTML" class="bg-emerald-500 w-full h-full") Loading...
+div(id="fullImageModal")
+    h1 full image modal here

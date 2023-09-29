@@ -1,18 +1,16 @@
 require("dotenv").config();
-const is_production = process.env.NODE_ENV === "production";
-const processing_dir = process.env.FILES_DIR + 'processing/';
-const success_dir = process.env.FILES_DIR + 'images/';
+var exec = require('child_process').exec;
 
 
+function processImages() {
 
+    //exec("./dupecheck/dupecheck")
+    //var file = new File("./dupecheck/dupecheck");
+    //file.exec;
+    exec("dupecheck", (err, stdout, stderr) => {
+        console.log(err, stdout, stderr);
+    })
 
-function talkToGo() {
-    // var lib = ffi.Library("./dupecheck/dupecheck.so", {
-    //     'ProcessUploadedImages': ['string', ['string', 'string']]
-    // })
-
-    // var output = lib.ProcessUploadedImages(processing_dir, success_dir)
-    // console.log("Node got output from go: ", output)
 }
 
-module.exports = talkToGo
+module.exports = processImages

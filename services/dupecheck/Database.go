@@ -36,7 +36,7 @@ func ConnectDatabase() {
 
 	mclient = client
 	db = mclient.Database(database_name)
-	images_collection = db.Collection("ImageMeta")
+	images_collection = db.Collection(images_collection_name)
 
 }
 

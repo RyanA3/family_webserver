@@ -23,6 +23,7 @@ var process_dir = "/home/ryan/repos/family_image_server/files/processing"
 var images_dir = "/home/ryan/repos/family_image_server/files/images"
 var output_dir = "/home/ryan/repos/family_image_server/files/processing.json"
 var database_name = "FamilyDB"
+var images_collection_name = "imagemetas"
 
 const env_path = "/home/ryan/repos/family_image_server/.env"
 
@@ -38,6 +39,7 @@ func initConstants() {
 	images_dir = files_dir + viper.GetString("IMAGES_FOLDER")
 	output_dir = files_dir + viper.GetString("DUPECHECK_OUTPUT_FILE")
 	database_name = viper.GetString("MONGO_DATABASE")
+	images_collection_name = viper.GetString("MONGO_IMAGE_META_COLLECTION_NAME") + "s"
 
 	fmt.Printf("Loaded env with viper")
 }

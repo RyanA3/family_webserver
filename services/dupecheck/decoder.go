@@ -79,6 +79,12 @@ func decode(filepath string) ImageMeta {
 }
 
 func RenameAndMove(filepath string, meta ImageMeta) {
+	//In case the target directory is incorrect, avoid destroying everything in it
+	if (meta.extension != "png" && meta.extension != "jpg" && meta.extension != "jpeg") || (meta.extension == "" && meta.camera_make == "") {
+		fmt.Println("\n=====\nFATAL: Error moving file, is the directory correct?\n=====")
+		return
+	}
+
 	newpath := images_dir + "/" + meta.id.Hex()
 	if len(meta.extension) > 0 {
 		newpath += "." + meta.extension
