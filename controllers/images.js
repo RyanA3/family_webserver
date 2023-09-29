@@ -35,7 +35,7 @@ router.post('/upload', (req,res) => {
 
 })
 
-const page_size = 30;
+const page_size = 3;
 var image_cards = pug.compileFile(`${root_directory}/views/components/image_cards.pug`)
 router.get('/images/:page', async (req, res) => {
 
@@ -73,6 +73,13 @@ router.get('/images/:page', async (req, res) => {
         console.error(e)
     }
 
+})
+
+var pageChanger = pug.compileFile(`${root_directory}/views/components/page_changer.pug`)
+router.get('/pageChanger/:page', (req, res) => {
+    if(!is_production) pageChanger = pug.compileFile(`${root_directory}/views/components/page_changer.pug`)
+    console.log('Sent page changed:\n', pageChanger({page: req.params.page}))
+    res.status(200).send(pageChanger({page: req.params.page}))
 })
 
 var fullImageCard = pug.compileFile(`${root_directory}/views/components/full_image_card.pug`)

@@ -1,6 +1,41 @@
-div(class="p-10 flex flex-col gap-10 items-center justify-center")
-    div(class="p-10 bg-zinc-700 border-orange-600 border-2 rounded shadow flex flex-col justify-center items-start gap-10 text-xl w-full h-full")
-        h1.text-3xl Search Images
-        div(hx-get="/image/images/0" hx-trigger="load" hx-swap="outerHTML" class="bg-emerald-500 w-full h-full") Loading...
+div(class="p-10 flex items-center justify-center")
+    div(class="p-10 bg-zinc-700 border-orange-600 border-2 rounded shadow flex flex-col justify-center items-start gap-4 text-xl w-full h-full")
+        h1.text-3xl Images
+        div(class="w-full pt-4 pb-4 border-t-2 border-b-2 border-zinc-600")
+            div(class="flex flex-row justify-between")
+                div(
+                    id="pageChanger"
+                    hx-trigger="load"
+                    hx-get=`/image/pageChanger/0`
+                    hx-target="#pageChanger"
+                    hx-swap="outerHTML"
+                    )
+                form(class="flex flex-row justify-left items-begin gap-8")
+                    div(class="flex flex-col justify-between items-begin")
+                        p Sort By
+                        div(class="flex flex-row gap-6")
+                            div(class="flex flex-col w-full justify-between")
+                                label(for="sortBy") Field
+                                label(for="sortDirection") Order
+                            div(class="flex flex-col w-full justify-between")
+                                select(id="sortBy" name="sortBy" class="text-black shrink")
+                                    option(value="created") Date Taken
+                                    option(value="uploaded") Date uploaded
+                                    option(value="file_size") File Size
+                                select(id="sortDirection" name="sortDirection" class="text-black")
+                                    option(value="descending") Descending
+                                    option(value="ascending") Ascending
+                    p Filter
+                    div(class="flex flex-col justify-between items-begin")
+                        p By Time Taken
+                        div(class="flex flex-row gap-6")
+                            div(class="flex flex-col w-full justify-between")
+                                label(for="after") After
+                                label(for="before") Before
+                            div(class="flex flex-col w-full justify-between")
+                                input(id="after" name="after" type="datetime-local" class="text-black w-full")
+                                input(id="before" name="before" type="datetime-local" class="text-black w-full")
+
+        div(id="imageCards" hx-get="/image/images/0" hx-trigger="load" hx-swap="outerHTML" class="bg-emerald-500 w-full h-full") Loading...
+
 div(id="fullImageModal")
-    h1 full image modal here
