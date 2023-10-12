@@ -21,7 +21,7 @@ import (
 
 var process_dir = "/home/ryan/repos/family_image_server/files/processing"
 var images_dir = "/home/ryan/repos/family_image_server/files/images"
-var output_dir = "/home/ryan/repos/family_image_server/files/processing.json"
+var mini_images_dir = "/home/ryan/repos/family_image_server/files/images/small"
 var database_name = "FamilyDB"
 var images_collection_name = "imagemetas"
 
@@ -37,7 +37,7 @@ func initConstants() {
 	files_dir := viper.GetString("FILES_DIR")
 	process_dir = files_dir + viper.GetString("PROCESSING_FOLDER")
 	images_dir = files_dir + viper.GetString("IMAGES_FOLDER")
-	output_dir = files_dir + viper.GetString("DUPECHECK_OUTPUT_FILE")
+	mini_images_dir = viper.GetString("MINI_IMAGES_DIR")
 	database_name = viper.GetString("MONGO_DATABASE")
 	images_collection_name = viper.GetString("MONGO_IMAGE_META_COLLECTION_NAME") + "s"
 
@@ -72,6 +72,9 @@ func ProcessUploadedImages(process_dir, success_dir string) {
 
 			//2.3 Move to images folder
 			RenameAndMove(filepath, meta)
+
+			//2.4 Create a small version in mini folder
+			CreateMinified(meta)
 
 			c <- meta
 
