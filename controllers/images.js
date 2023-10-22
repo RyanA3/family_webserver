@@ -40,9 +40,10 @@ var image_cards = pug.compileFile(`${root_directory}/views/components/image_card
 router.get('/images/:page', async (req, res) => {
 
     var page = req.params.page;
-
     var sort = { created: 'asc' }
-    if(req.body && req.body.sort) sort = req.body.sort;
+    if(req.query && req.query.sortBy) sort = { [req.query.sortBy]: req.query.sortDirection }
+
+    console.log(req.query);
 
     try {
         var metas = await ImageMeta.find({})
