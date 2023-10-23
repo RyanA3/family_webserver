@@ -24,6 +24,7 @@ const ImageMeta = require("./models/ImageMeta.js")
 
 
 
+
 var index = pug.compileFile(`${root_directory}/views/index.pug`);
 app.get('/', (req, res) => {
     if(!is_production) index = pug.compileFile(`${root_directory}/views/index.pug`);

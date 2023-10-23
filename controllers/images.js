@@ -14,6 +14,18 @@ const processImages = require("../services/dupecheck.js");
 
 const ImageMeta = require('../models/ImageMeta.js')
 
+const datefns = require('date-fns');
+const { format } = datefns;
+
+
+function formatBytes(bytes) {
+
+    if(bytes / 1000 < 1) return `${bytes} Bytes`;
+    if(bytes / 1000000 < 1) return `${Math.round(bytes / 10) / 100} KB`;
+    if(bytes / 1000000000 < 1) return `${Math.round(bytes / 10000) / 100} MB`;
+    return `${Math.round(bytes / 10000000) / 100} GB`;
+
+}
 
 
 const uploadPage = pug.compileFile(`${root_directory}/views/pages/upload.pug`);
@@ -40,7 +52,7 @@ var image_cards = pug.compileFile(`${root_directory}/views/components/image_card
 router.get('/images/:page', async (req, res) => {
 
     var page = req.params.page;
-    var sort = { created: 'asc' }
+    var sort = { created: 'desc' }
     if(req.query && req.query.sortBy) sort = { [req.query.sortBy]: req.query.sortDirection }
 
     console.log(req.query);
@@ -51,9 +63,26 @@ router.get('/images/:page', async (req, res) => {
         .limit(page_size)
         .skip(page * page_size)
         .select({ 
-            _id: 1, 
+            _id: 1,
+            file_size: 1,
+            original_name: 1,
+            created: 1,
+            uploaded: 1,
             extension: 1
         })
+
+        var displayInfo = [metas.length];
+
+        //Format dates for display
+        for(var i = 0; i < metas.length; i++) {
+            displayInfo[i] = {
+                created: format(new Date(metas[i].created), "MMM do y"),
+                uploaded: format(new Date(metas[i].uploaded), "MMM do y"),
+                file_size: formatBytes(Number(metas[i].file_size)),
+                original_name: metas[i].original_name,
+            }
+        }
+
 
         console.log("Got images for client:\n " + metas);
 
@@ -67,7 +96,7 @@ router.get('/images/:page', async (req, res) => {
         console.log("\n\nGenerated names: " + imageNames + "\n\n")
 
         if(!is_production) image_cards = pug.compileFile(`${root_directory}/views/components/image_cards.pug`)
-        res.status(200).send(image_cards({imageNames: imageNames}))
+        res.status(200).send(image_cards({imageNames: imageNames, imageMetas: displayInfo}))
 
 
     } catch (e) {

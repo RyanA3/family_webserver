@@ -1,7 +1,6 @@
 div(class="p-10 flex items-center justify-center")
     div(class="p-10 bg-zinc-700 border-orange-600 border-2 rounded shadow flex flex-col justify-center items-start gap-4 text-xl w-full h-full")
-        h1.text-3xl Images
-        div(class="w-full pt-4 pb-4 border-t-2 border-b-2 border-zinc-600")
+        div(class="w-full pb-4 border-b-2 border-zinc-600")
             div(class="flex flex-row justify-between")
                 div(class="flex flex-col justify-between"
                     id="pageChanger"
@@ -54,7 +53,7 @@ script.
     var page = 0;
     var qvalues = {
         sortBy: "created",
-        sortDirection: "asc",
+        sortDirection: "desc",
     };
     console.log("Begin search script")
     console.log(`Page: ${page}`)
@@ -78,14 +77,26 @@ script.
             values: qvalues
         });
     })
+    htmx.on("#sortBy", "change", function(event) {
+        qvalues.sortBy = event.target.value;
+        reloadImages();
+    })
+    htmx.on("#sortDirection", "change", function(event) {
+        qvalues.sortDirection = event.target.value;
+        reloadImages();
+    })
     htmx.on("#queryForm", "submit", function(event) {
         event.preventDefault();
 
         qvalues.sortBy = event.target.sortBy.value;
         qvalues.sortDirection = event.target.sortDirection.value;
 
+        reloadImages();
+    })
+
+    function reloadImages() {
         htmx.ajax('GET', `/image/images/${Number(page)}`, {
             target:'#imageCards', swap: 'outerHTML', 
             values: qvalues
         });
-    })
+    }
