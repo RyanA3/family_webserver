@@ -14,6 +14,11 @@ div(class="p-10 flex items-center justify-center")
                         id="prevPage") Prev
                         p(class="cursor-pointer"
                         id="nextPage") Next
+
+                div(class="flex flex-row justify-center items-center gap-4")
+                    input(type="checkbox" id="showDuplicates" class="")
+                    p Show Duplicates
+                
                 form(class="flex flex-row justify-left items-begin gap-8"
                     id="queryForm"
                 )
@@ -54,6 +59,7 @@ script.
     var qvalues = {
         sortBy: "created",
         sortDirection: "desc",
+        showDuplicates: "no",
     };
     console.log("Begin search script")
     console.log(`Page: ${page}`)
@@ -91,6 +97,11 @@ script.
         qvalues.sortBy = event.target.sortBy.value;
         qvalues.sortDirection = event.target.sortDirection.value;
 
+        reloadImages();
+    })
+    htmx.on("#showDuplicates", "change", function(event) {
+        if(event.target.checked) qvalues.showDuplicates = "yes";
+        else qvalues.showDuplicates = "no";
         reloadImages();
     })
 

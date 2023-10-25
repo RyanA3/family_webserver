@@ -67,6 +67,14 @@ func decode(filepath string) ImageMeta {
 		return meta
 	}
 
+	//Try to get location data if it is present
+	lat, long, llerr := xdata.LatLong()
+
+	if llerr != nil {
+		meta.lat = lat
+		meta.long = long
+	}
+
 	// Convenience functions for getting datetime
 	meta.created, err = xdata.DateTime()
 

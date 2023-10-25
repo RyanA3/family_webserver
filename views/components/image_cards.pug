@@ -3,7 +3,7 @@ div(
     id="imageCards"
     )
     each imgName, index in imageNames
-        div(class="basis-[15%]")
+        div(class="basis-[15%] bg-zinc-900 shadow rounded")
             img(
                 alt="Failed to load image" 
                 src=`images/small/${imgName}` 
@@ -14,7 +14,7 @@ div(
                 hx-target="#fullImageModal"
                 hx-swap="innerHTML"
                 )
-            div(class="object-contain text-sm p-4 bg-zinc-900")
+            div(class="object-contain text-sm p-4")
                 div=`"${imageMetas[index].original_name}"`
                 table(class="w-full")
                     tr

@@ -77,6 +77,8 @@ func UpdateDuplicates(imgdat ImageMeta) int {
 		"created":       0,
 		"uploaded":      0,
 		"extension":     0,
+		"lat":           0,
+		"long":          0,
 	})
 
 	query := bson.M{
@@ -181,6 +183,10 @@ func DecodeImageMeta(data primitive.D) ImageMeta {
 			if v.Value != nil {
 				out.duplicates = v.Value.([]string)
 			}
+		case "lat":
+			out.lat = v.Value.(float64)
+		case "long":
+			out.long = v.Value.(float64)
 		default:
 			fmt.Printf("Its jover -- Field DIDNT Load {%s : some_value}", v.Key)
 		}

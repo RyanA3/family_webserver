@@ -53,12 +53,26 @@ router.get('/images/:page', async (req, res) => {
 
     var page = req.params.page;
     var sort = { created: 'desc' }
+    var filter = {};
     if(req.query && req.query.sortBy) sort = { [req.query.sortBy]: req.query.sortDirection }
+
+    if(req.query && req.query.showDuplicates && req.query.showDuplicates == "no" || (!req.query.showDuplicates)) {
+        console.log("Not showing duplicates")
+        filter = { 
+            ...filter, 
+            $or: [
+                {duplicates: null},
+                {duplicates: {$exists: false}},
+                {duplicates: []}
+            ]
+        } 
+        
+    }   
 
     console.log(req.query);
 
     try {
-        var metas = await ImageMeta.find({})
+        var metas = await ImageMeta.find(filter)
         .sort(sort)
         .limit(page_size)
         .skip(page * page_size)
