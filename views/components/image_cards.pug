@@ -1,28 +1,24 @@
-div(
-    class="flex flex-row items-stretch justify-between gap-4 w-full h-full flex-wrap"
-    id="imageCards"
-    )
-    each imgName, index in imageNames
-        div(class="basis-[15%] bg-zinc-900 shadow rounded")
-            img(
-                alt="Failed to load image" 
-                src=`images/small/${imgName}` 
-                class="object-contain border-2 border-orange-300 cursor-pointer"
-                id=imgName
-                hx-get=`image/full/${imgName}`
-                hx-trigger="click"
-                hx-target="#fullImageModal"
-                hx-swap="innerHTML"
-                )
-            div(class="object-contain text-sm p-4")
-                div=`"${imageMetas[index].original_name}"`
-                table(class="w-full")
-                    tr
-                        td Size
-                        td=`${imageMetas[index].file_size}`
-                    tr
-                        td Taken
-                        td=`${imageMetas[index].created}`
-                    tr
-                        td Uploaded
-                        td=`${imageMetas[index].uploaded}`
+each imgName, index in imageNames
+    div(class="basis-[15%] bg-zinc-900 shadow rounded")
+        img(
+            alt="Failed to load image" 
+            src=`images/small/${imgName}` 
+            class="object-contain border-2 border-orange-300 cursor-pointer"
+            id=imgName
+            hx-get=`image/full/${imgName}`
+            hx-trigger="click"
+            hx-target="#fullImageModal"
+            hx-swap="innerHTML"
+            )
+        div(class="object-contain text-sm p-4")
+            div=`"${imageMetas[index].original_name}"`
+            table(class="w-full")
+                tr
+                    td Size
+                    td=`${imageMetas[index].file_size}`
+                tr
+                    td Taken
+                    td=`${imageMetas[index].created}`
+                tr
+                    td Uploaded
+                    td=`${imageMetas[index].uploaded}`

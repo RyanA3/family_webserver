@@ -1,56 +1,43 @@
 div(class="p-10 flex items-center justify-center")
     div(class="p-10 bg-zinc-700 border-orange-600 border-2 rounded shadow flex flex-col justify-center items-start gap-4 text-xl w-full h-full")
         div(class="w-full pb-4 border-b-2 border-zinc-600")
-            div(class="flex flex-row justify-between")
-                div(class="flex flex-col justify-between"
-                    id="pageChanger"
-                    hx-trigger="change"
-                    hx-get=`/image/images/${page}`
-                    hx-target="#imageCards"
-                    hx-swap="outerHTML")
-                    p(id="pageDisplay") Page -1
-                    div(class="flex flex-row gap-10")
-                        p(class="cursor-pointer" 
-                        id="prevPage") Prev
-                        p(class="cursor-pointer"
-                        id="nextPage") Next
+            form(class="flex flex-row justify-left gap-4" id="queryForm")
+                fieldset(class="p-4 border border-orange-400 flex flex-col gap-4")
+                    legend(class="px-2 text-orange-500" id="pageDisplay") Page
+                    div(class="flex flex-row gap-4")
+                        button(class="bg-orange-500 px-4 py-1 rounded hover:bg-orange-400 transition-colors font-bold" id="prevPage" value="Prev") Prev
+                        button(class="bg-orange-500 px-4 py-1 rounded hover:bg-orange-400 transition-colors font-bold" id="nextPage" value="Next") Next
+                    input(type="number" id="pageInput" class="w-full bg-orange-100 border-orange-200 text-black" value="1" min="1" size="4")
+                fieldset(class="p-4 border border-orange-400")
+                    legend(class="px-2 text-orange-500") Options
+                    div(class="flex flex-row justify-center items-center gap-4")
+                        input(type="checkbox" id="showDuplicates" class="")
+                        p Show Duplicates
+                fieldset(class="p-4 border border-orange-400")
+                    legend(class="px-2 text-orange-500") Sort
+                    table(class="border-seperate border-spacing-2" cellspacing="10")
+                        tbody
+                            tr
+                                td(class="pr-4")
+                                    label(for="sortBy") By
+                                td
+                                    select(id="sortBy" name="sortBy" class="text-black w-full")
+                                        option(value="created") Date Taken
+                                        option(value="uploaded") Date uploaded
+                                        option(value="file_size") File Size
+                            tr
+                                td(class="pr-4")
+                                    label(for="sortDirection") Direction
+                                td
+                                    select(id="sortDirection" name="sortDirection" class="text-black w-full")
+                                        option(value="desc") Descending
+                                        option(value="asc") Ascending
+                fieldset(class="p-4 border border-orange-400")
+                    legend(class="px-2 text-orange-500") Filter
+                    div Hi
+                    div Hi2
 
-                div(class="flex flex-row justify-center items-center gap-4")
-                    input(type="checkbox" id="showDuplicates" class="")
-                    p Show Duplicates
-                
-                form(class="flex flex-row justify-left items-begin gap-8"
-                    id="queryForm"
-                )
-                    input(
-                        class="cursor-pointer"
-                        type="submit" value="Go")
-                    div(class="flex flex-col justify-between items-begin")
-                        p Sort By
-                        div(class="flex flex-row gap-6")
-                            div(class="flex flex-col w-full justify-between")
-                                label(for="sortBy") Field
-                                label(for="sortDirection") Order
-                            div(class="flex flex-col w-full justify-between")
-                                select(id="sortBy" name="sortBy" class="text-black shrink")
-                                    option(value="created") Date Taken
-                                    option(value="uploaded") Date uploaded
-                                    option(value="file_size") File Size
-                                select(id="sortDirection" name="sortDirection" class="text-black")
-                                    option(value="desc") Descending
-                                    option(value="asc") Ascending
-                    p Filter
-                    div(class="flex flex-col justify-between items-begin")
-                        p By Time Taken
-                        div(class="flex flex-row gap-6")
-                            div(class="flex flex-col w-full justify-between")
-                                label(for="after") After
-                                label(for="before") Before
-                            div(class="flex flex-col w-full justify-between")
-                                input(id="after" name="after" type="datetime-local" class="text-black w-full")
-                                input(id="before" name="before" type="datetime-local" class="text-black w-full")
-
-        div(id="imageCards" hx-get="/image/images/0" hx-trigger="load" hx-swap="outerHTML" class="bg-emerald-500 w-full h-full") Loading...
+        div(id="imageCards" hx-get="image/images/0" hx-trigger="load" class="flex flex-row items-stretch justify-between gap-4 w-full h-full flex-wrap") Loading...
 
 div(id="fullImageModal")
 
@@ -64,22 +51,28 @@ script.
     console.log("Begin search script")
     console.log(`Page: ${page}`)
     htmx.find("#pageDisplay").innerHTML = `Page ${Number(page)+1}`;
+    htmx.on("#pageInput", "keydown", function(event) {
+        page = Number(event.target.value);
+        reloadImages();
+    })
     htmx.on("#prevPage", "click", function(event) {
         page--;
         if(page < 0) page = 0;
         htmx.find("#pageDisplay").innerHTML = `Page ${Number(page)+1}`;
+        htmx.find("#pageInput").value = Number(page)+1;
         htmx.ajax('GET', `/image/images/${Number(page)}`, {
             target:'#imageCards', 
-            swap: 'outerHTML',
+            swap: 'innerHTML',
             values: qvalues
         });
     })
     htmx.on("#nextPage", "click", function(event) {
         page++;
         htmx.find("#pageDisplay").innerHTML = `Page ${Number(page)+1}`;
+        htmx.find("#pageInput").value = Number(page)+1;
         htmx.ajax('GET', `/image/images/${Number(page)}`, {
             target:'#imageCards', 
-            swap: 'outerHTML',
+            swap: 'innerHTML',
             values: qvalues
         });
     })
@@ -107,7 +100,7 @@ script.
 
     function reloadImages() {
         htmx.ajax('GET', `/image/images/${Number(page)}`, {
-            target:'#imageCards', swap: 'outerHTML', 
+            target:'#imageCards', swap: 'innerHTML', 
             values: qvalues
         });
     }

@@ -85,6 +85,12 @@ router.get('/images/:page', async (req, res) => {
             extension: 1
         })
 
+        //Return empty response if nothing was found
+        if(metas.length == 0) {
+            res.status(200).send("<div id=\"imageCards\"><div>Nothing Found</div></div>");
+            return;
+        }
+
         var displayInfo = [metas.length];
 
         //Format dates for display
