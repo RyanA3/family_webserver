@@ -1,57 +1,75 @@
 div(class="p-10 flex items-center justify-center")
     div(class="p-10 bg-zinc-700 border-orange-600 border-2 rounded shadow flex flex-col justify-center items-start gap-4 text-xl w-full h-full")
         div(class="w-full pb-4 border-b-2 border-zinc-600")
-            form(class="flex flex-row justify-left gap-4" id="queryForm")
+            form(class="flex flex-row justify-left gap-4 flex-wrap" id="queryForm")
                 fieldset(class="p-4 border border-orange-400 flex flex-col gap-4")
                     legend(class="px-2 text-orange-500" id="pageDisplay") Page
                     div(class="flex flex-row gap-4")
                         button(class="bg-orange-500 px-4 py-1 rounded hover:bg-orange-400 transition-colors font-bold" id="prevPage" value="Prev") Prev
                         button(class="bg-orange-500 px-4 py-1 rounded hover:bg-orange-400 transition-colors font-bold" id="nextPage" value="Next") Next
-                    input(type="number" id="pageInput" class="w-full bg-orange-100 border-orange-200 text-black" value="1" min="1" size="4")
-                fieldset(class="p-4 border border-orange-400")
+                    input(type="text" inputmode="number" id="pageInput" class="px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border text-black outline-none focus:ring ring-orange-400" value="1" min="1" size="4")
+                fieldset(class="p-4 border border-orange-400 flex flex-col gap-4")
                     legend(class="px-2 text-orange-500") Options
                     div(class="flex flex-row justify-center items-center gap-4")
-                        input(type="checkbox" id="showDuplicates" class="")
-                        p Show Duplicates
-                fieldset(class="p-4 border border-orange-400")
+                        input(type="checkbox" id="showDuplicates" class="w-8 h-8 outline-none border-orange-400 bg-orange-300")
+                        label(for="showDuplicates") Show Duplicates
+                    div(class="flex flex-row justify-center items-center gap-4 w-full")
+                        label(for="pageSize" class="w-full") Page Size
+                        input(type="text" inputmode="number" id="pageSize" class="px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border text-black outline-none focus:ring ring-orange-400" value="12" min="1" size="4")
+                fieldset(class="p-4 border border-orange-400 flex flex-col gap-4")
                     legend(class="px-2 text-orange-500") Sort
-                    table(class="border-seperate border-spacing-2" cellspacing="10")
-                        tbody
-                            tr
-                                td(class="pr-4")
-                                    label(for="sortBy") By
-                                td
-                                    select(id="sortBy" name="sortBy" class="text-black w-full")
-                                        option(value="created") Date Taken
-                                        option(value="uploaded") Date uploaded
-                                        option(value="file_size") File Size
-                            tr
-                                td(class="pr-4")
-                                    label(for="sortDirection") Direction
-                                td
-                                    select(id="sortDirection" name="sortDirection" class="text-black w-full")
-                                        option(value="desc") Descending
-                                        option(value="asc") Ascending
-                fieldset(class="p-4 border border-orange-400")
-                    legend(class="px-2 text-orange-500") Filter
-                    div Hi
-                    div Hi2
+                    div(class="flex flex-row justify-center items-center gap-4 w-full")
+                        label(for="sortBy" class="w-1/3") By
+                        select(id="sortBy" name="sortBy" class="text-black px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border outline-none focus:ring ring-orange-400")
+                            option(value="created") Date Taken
+                            option(value="uploaded") Date uploaded
+                            option(value="file_size") File Size
+                    div(class="flex flex-row justify-center items-center gap-4 w-full")
+                        label(for="sortDirection") Order
+                        select(id="sortDirection" name="sortDirection" class="text-black w-full px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border outline-none focus:ring ring-orange-400")
+                            option(value="desc") Descending
+                            option(value="asc") Ascending
+                fieldset(class="p-4 border border-orange-400 flex flex-col gap-4")
+                    legend(class="px-2 text-orange-500") Filters
+                    div(class="flex flex-row justify-center items-center gap-4 w-full")
+                        input(type="date" id="filterAfter" class="px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border text-black outline-none focus:ring ring-orange-400")
+                        label(for="filterAfter") <
+                        div(class="whitespace-nowrap") Date Taken
+                        label(for="filterBefore") <
+                        input(type="date" id="filterBefore" class="px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border text-black outline-none focus:ring ring-orange-400")
+                    div(class="flex flex-row justify-center items-center gap-4 w-full")
+                        label(for="filterCamera") Camera
+                        input(type="text" id="filterCamera" class="px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border text-black outline-none focus:ring ring-orange-400")
+                    div(class="flex flex-row justify-center items-center gap-4 w-full")
+                        label(for="filterOriginalName" class="whitespace-nowrap") Original Name
+                        input(type="text" id="filterOriginalName" class="px-2 py-1 rounded w-full bg-orange-200 border-orange-00 border text-black outline-none focus:ring ring-orange-400")
+                fieldset(class="p-4 flex flex-col items-center justify-center gap-4")
+                    input(type="reset" id="formReset" class="bg-red-500 px-4 py-1 rounded hover:bg-red-400 transition-colors font-bold cursor-pointer")
 
-        div(id="imageCards" hx-get="image/images/0" hx-trigger="load" class="flex flex-row items-stretch justify-between gap-4 w-full h-full flex-wrap") Loading...
+                    
+
+        div(id="imageCards" hx-get="image/images/0" hx-trigger="load" class="flex flex-row items-stretch justify-start gap-4 w-full h-full flex-wrap") Loading...
 
 div(id="fullImageModal")
 
 script.
     var page = 0;
-    var qvalues = {
-        sortBy: "created",
-        sortDirection: "desc",
-        showDuplicates: "no",
-    };
+    var qvalues = {};
+
+    function resetQueryValues() {
+        qvalues = {
+            sortBy: "created",
+            sortDirection: "desc",
+            showDuplicates: "no",
+            pageSize: 12,
+        };
+    }
+    resetQueryValues();
+
     console.log("Begin search script")
     console.log(`Page: ${page}`)
     htmx.find("#pageDisplay").innerHTML = `Page ${Number(page)+1}`;
-    htmx.on("#pageInput", "keydown", function(event) {
+    htmx.on("#pageInput", "change", function(event) {
         page = Number(event.target.value);
         reloadImages();
     })
@@ -75,6 +93,68 @@ script.
             swap: 'innerHTML',
             values: qvalues
         });
+    })
+    htmx.on("#queryForm", "reset", function(event) {
+        resetQueryValues();
+        reloadImages();
+    })
+    htmx.on("#filterAfter", "change", function(event) {
+        if(!event.target.value) {
+            delete qvalues.filterAfter
+            return;
+        }
+        if(qvalues.filterAfter) qvalues.filterAfter = event.target.value;
+        else {
+            qvalues = {
+                ...qvalues,
+                filterAfter: event.target.value
+            }
+        }
+        reloadImages();
+    })
+    htmx.on("#filterBefore", "change", function(event) {
+        if(!event.target.value) {
+            delete qvalues.filterBefore
+            return;
+        }
+        if(qvalues.filterBefore) qvalues.filterBefore = event.target.value;
+        else {
+            qvalues = {
+                ...qvalues,
+                filterBefore: event.target.value
+            }
+        }
+        reloadImages();
+    })
+    htmx.on("#filterCamera", "change", function(event) {
+        if(!event.target.value) {
+            delete qvalues.filterCamera
+            return;
+        }
+        if(qvalues.filterCamera) qvalues.filterCamera = event.target.value;
+        else {
+            qvalues = {
+                ...qvalues,
+                filterCamera: event.target.value
+            }
+        }
+    })
+    htmx.on("#filterOriginalName", "change", function(event) {
+        if(!event.target.value) {
+            delete qvalues.filterOriginalName
+            return;
+        }
+        if(qvalues.filterOriginalName) qvalues.filterOriginalName = event.target.value;
+        else {
+            qvalues = {
+                ...qvalues,
+                filterOriginalName: event.target.value
+            }
+        }
+    })
+    htmx.on("#pageSize", "change", function(event) {
+        qvalues.pageSize = event.target.value;
+        reloadImages();
     })
     htmx.on("#sortBy", "change", function(event) {
         qvalues.sortBy = event.target.value;

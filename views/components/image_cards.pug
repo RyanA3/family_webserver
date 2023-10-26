@@ -1,7 +1,7 @@
 each imgName, index in imageNames
-    div(class="basis-[15%] bg-zinc-900 shadow rounded")
+    div(class="basis-[15%] grow bg-zinc-900 shadow rounded")
         img(
-            alt="Failed to load image" 
+            alt="Failed to load image preview" 
             src=`images/small/${imgName}` 
             class="object-contain border-2 border-orange-300 cursor-pointer"
             id=imgName
@@ -22,3 +22,6 @@ each imgName, index in imageNames
                 tr
                     td Uploaded
                     td=`${imageMetas[index].uploaded}`
+                tr
+                    td Camera
+                    td=`${imageMetas[index].camera}`
