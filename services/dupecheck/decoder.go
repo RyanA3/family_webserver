@@ -16,6 +16,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+//TODO
+/*
+https://www.reddit.com/r/golang/comments/83mfkm/reading_video_stream_metadata_with_go/
+https://copyprogramming.com/howto/first-frame-of-video
+
 /*
 Takes
   - a path to an image file

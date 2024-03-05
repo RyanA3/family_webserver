@@ -1,0 +1,26 @@
+div(class="grow bg-zinc-900 shadow rounded")
+    img(
+        alt="Failed to load image preview" 
+        src=`images/small/${imageName}` 
+       class="object-contain border-2 border-orange-300 cursor-pointer"
+        id=imageName
+        hx-get=`image/full/${imageName}`
+        hx-trigger="click"
+        hx-target="#fullImageModal"
+        hx-swap="innerHTML"
+        )
+    div(class="object-contain text-sm p-4")
+        div=`"${imageMeta.original_name}"`
+        table(class="w-full")
+            tr
+                td Size
+                td=`${imageMeta.file_size}`
+            tr
+                td Taken
+                td=`${imageMeta.created}`
+            tr
+                td Uploaded
+                td=`${imageMeta.uploaded}`
+            tr
+                td Camera
+                td=`${imageMeta.camera}`

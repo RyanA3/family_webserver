@@ -1,2 +1,54 @@
 div(class="p-10 flex flex-col gap-10 items-center justify-center")
-    h1 Manage page
+    h1 Manage Images
+
+    div(class="w-full border-2 border-orange-600 rounded shadow p-4")
+        h2 Duplicate Viewer
+        p The following images are duplicates, select which ones you would like to discard
+
+        div(
+            id="imageCards"
+            class="w-full h-full flex flex-row flex-wrap gap-10 items-stretch justify-center"
+            )
+            
+
+
+script.
+    var currentImage
+
+    function getFirstDuplicate() {
+        var req = new XMLHttpRequest()
+
+        req.onreadystatechange = function() {
+            if(this.readyState == 4 && this.status == 200) {
+                currentImage = JSON.parse(this.responseText)
+                console.log('Got JSON Response ', currentImage)
+            }
+        }
+
+        req.open('GET', 'image/firstDuplicate', true)
+        req.send()
+    }
+
+    function updateImages() {
+        mainImage = currentImage._id
+        duplicates = currentImage.duplicates
+
+        console.log("Updating images with main: ", mainImage, "\nduplicates: ", duplicates)
+
+        images = []
+        images.push(mainImage)
+        images = images.concat(duplicates)
+
+        query = {
+            ids: images
+        }
+
+        htmx.ajax('GET', 'image/ids', {
+            target: "#imageCards", swap: "innerHTML",
+            values: query
+        })
+    }
+
+
+    getFirstDuplicate()
+    updateImages()
