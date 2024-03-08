@@ -5,10 +5,6 @@ each imgName, index in imageNames
             src=`images/small/${imgName}` 
             class="object-contain border-2 border-orange-300 cursor-pointer"
             id=imgName
-            hx-get=`image/full/${imgName}`
-            hx-trigger="click"
-            hx-target="#fullImageModal"
-            hx-swap="innerHTML"
             )
         div(class="object-contain text-sm p-4")
             div=`"${imageMetas[index].original_name}"`
