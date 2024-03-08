@@ -1,6 +1,6 @@
 require("dotenv").config();
 const is_production = process.env.NODE_ENV === "production";
-const root_directory = "home/ryan/repos/family_image_server"; //process.env.ROOT_DIR;
+const root_directory = "/home/ryan/repos/family_image_server"; //process.env.ROOT_DIR;
 
 const pug = require("pug");
 const errMsg = pug.compileFile(
