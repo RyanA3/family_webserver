@@ -8,7 +8,7 @@ import (
 	"path"
 )
 
-const VIEWS_PATH string = "./assets/views/"
+const VIEWS_PATH string = "./views/"
 const TEMPLATE_404_KEY string = "404"
 const TEMPLATE_404_CONTENT string = "<p>404 Not Found</p>"
 var TEMPLATES map[string]*template.Template = make(map[string]*template.Template)
