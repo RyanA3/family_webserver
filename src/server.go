@@ -2,20 +2,18 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 )
 
 var (
 	HTTP_ADDRESS = ":8080"
-	PAGE_ROUTE = "/pages"
 )
 
 func main() {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/pages/{page}", getPage)
 	mux.HandleFunc("/", getIndex)
-	mux.HandleFunc(PAGE_ROUTE, getPage)
 
 	err := http.ListenAndServe(HTTP_ADDRESS, mux)
 
@@ -29,17 +27,18 @@ func main() {
 
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("GET INDEX\n")
-	io.WriteString(w, "Response")
+	
+	template := GetTemplate("index.pug")
+
+	template.Execute(w, "No Args")
 }
 
 func getPage(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("GET PAGE\n");
-	
-	path := r.URL.Path[len(PAGE_ROUTE):]
-
+	path := r.URL.Path[1:]
 	template := GetTemplate(path)
+	err := template.Execute(w, struct { URL string } { path })
 	
-	err := template.Execute(w, "No Args")
+	fmt.Printf("GET: %s\n", path)
 
 	if err != nil {
 		fmt.Printf("Failed to realize tempalte: %s\n", err)
