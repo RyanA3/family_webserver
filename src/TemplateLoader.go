@@ -9,6 +9,10 @@ import (
 )
 
 const VIEWS_PATH string = "./views/"
+const PAGES_PATH string = "/pages/"
+const COMPONENTS_PATH string = "/components/"
+const PAGE_404_PATH = "/pages/404.pug"
+
 const TEMPLATE_404_KEY string = "404"
 const TEMPLATE_404_CONTENT string = "<p>404 Not Found</p>"
 var TEMPLATES map[string]*template.Template = make(map[string]*template.Template)
@@ -68,9 +72,32 @@ func GetTemplate(key string) *template.Template {
 
 	if err != nil {
 		fmt.Printf("Failed to get template %s\n", key)
-		return GetNotFoundTemplate()
+		return nil
 	}
 
 	return templ
 }
 
+func GetPage(key string) *template.Template {
+	filepath := path.Join(PAGES_PATH, key)
+	templ := GetTemplate(filepath)
+
+	if templ == nil {
+		fmt.Printf("Failed to get page %s\n", key)
+		return GetTemplate(PAGE_404_PATH)
+	}
+
+	return templ
+}
+
+func GetComponent(key string) *template.Template {
+	filepath := path.Join(COMPONENTS_PATH, key)
+	templ := GetTemplate(filepath)
+
+	if templ == nil {
+		fmt.Printf("Failed to get component %s\n", key)
+		return GetNotFoundTemplate()
+	}
+
+	return templ
+}

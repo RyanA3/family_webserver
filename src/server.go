@@ -13,6 +13,7 @@ var (
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/pages/{page}", getPage)
+	mux.HandleFunc("/components/{component}", getComponent)
 	mux.HandleFunc("/", getIndex)
 
 	err := http.ListenAndServe(HTTP_ADDRESS, mux)
@@ -28,19 +29,32 @@ func main() {
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("GET INDEX\n")
 	
-	template := GetTemplate("index.pug")
+	templ := GetTemplate("index.pug")
 
-	template.Execute(w, "No Args")
+	templ.Execute(w, "No Args")
 }
 
 func getPage(w http.ResponseWriter, r *http.Request) {
-	path := r.URL.Path[1:]
-	template := GetTemplate(path)
-	err := template.Execute(w, struct { URL string } { path })
+	page := r.PathValue("page")
+	templ := GetPage(page)
+	err := templ.Execute(w, struct { URL string } { r.URL.Path })
 	
-	fmt.Printf("GET: %s\n", path)
+	fmt.Printf("GET: %s\n", page)
 
 	if err != nil {
-		fmt.Printf("Failed to realize tempalte: %s\n", err)
+		fmt.Printf("Failed to realize page template: %s\n", err)
+	}
+}
+
+func getComponent(w http.ResponseWriter, r *http.Request) {
+	component := r.PathValue("component")
+	templ := GetComponent(component)
+	err := templ.Execute(w, 
+		struct { URL string; Query map[string][]string } { r.URL.Path, r.URL.Query() })
+
+	fmt.Printf("GETL %s\n", component)
+
+	if err != nil {
+		fmt.Printf("Failed to realize component template: %s\n", err)
 	}
 }

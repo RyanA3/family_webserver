@@ -1,5 +1,5 @@
-include components/linkcard.pug
-include components/navlink.pug
+include views/components/linkcard.pug
+include views/components/navlink.pug
 doctype html 
 html(lang="en")
     head
@@ -9,7 +9,7 @@ html(lang="en")
         script
             include assets/htmx/htmx.min.js
     body(class="flex flex-col w-screen min-h-screen bg-zinc-800 text-white")
-        include components/navbar.pug
+        include views/components/navbar.pug
     
         div(id="page_container" class="flex-1 flex flex-col")
-            include pages/home.pug
+            include views/pages/home.pug

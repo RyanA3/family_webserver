@@ -45,3 +45,5 @@ node_modules
 /credentials/
 /credentials/*
 /files
+
+server
